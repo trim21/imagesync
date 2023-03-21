@@ -25,7 +25,6 @@ var Version string
 var ErrInvalidTag = errors.New("invalid tag")
 
 func Execute() error {
-
 	app := cli.NewApp()
 	app.Name = "imagesync"
 	app.Usage = "Sync container images in registries."

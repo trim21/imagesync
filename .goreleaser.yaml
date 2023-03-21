@@ -1,8 +1,9 @@
 before:
   hooks:
-    - apt update
-    - apt install libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config -y
+    - sudo apt-get update
+    - sudo apt-get install libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config -y
     - go mod download
+
 builds:
   - main: ./cmd/imagesync/main.go
     binary: imagesync
@@ -15,16 +16,13 @@ builds:
     ignore:
       - goos: darwin
         goarch: 386
+
 archives:
   - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    replacements:
-      linux: Linux
-      386: i386
-      amd64: x86_64
+
 checksum:
   name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
   filters:

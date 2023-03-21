@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/mqasimsarfraz/imagesync"
+	"github.com/trim21/imagesync"
 )
 
 func main() {

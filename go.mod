@@ -1,4 +1,4 @@
-module github.com/mqasimsarfraz/imagesync
+module github.com/trim21/imagesync
 
 go 1.17
 
