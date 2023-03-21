@@ -5,12 +5,6 @@ A tool to copy/sync container images in registries without a demon.
 ## Command
 
 ```
-docker run --rm -it smqasims/imagesync:v1.1.0 -h
-```
-
-or 
-
-```
 imagesync -h
 ```
 
