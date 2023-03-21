@@ -1,6 +1,6 @@
 module github.com/trim21/imagesync
 
-go 1.17
+go 1.20
 
 require (
 	github.com/containers/image/v5 v5.22.0
