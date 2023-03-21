@@ -5,11 +5,11 @@ go 1.17
 require (
 	github.com/containers/image/v5 v5.22.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/urfave/cli v1.22.4
+	github.com/urfave/cli v1.22.12
 )
 
 require (
-	github.com/BurntSushi/toml v1.2.0 // indirect
+	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
