@@ -1,14 +1,3 @@
-<p>
-    <a href="https://github.com/mqasimsarfraz/imagesync/actions/workflows/imagesync-ci.yaml">
-        <img src="https://github.com/mqasimsarfraz/imagesync/actions/workflows/imagesync-ci.yaml/badge.svg" alt="CI"/></a>
-    <a href="https://github.com/mqasimsarfraz/imagesync/actions/workflows/codeql-analysis.yml">
-        <img src="https://github.com/mqasimsarfraz/imagesync/actions/workflows/codeql-analysis.yml/badge.svg" alt="codeql"/></a>
-    <a href="https://mqasimsarfraz.github.io/">
-        <img src="https://img.shields.io/maintenance/yes/2022.svg" alt="maintained"/></a>
-    <a href="https://hub.docker.com/r/smqasims/imagesync">
-        <img src="https://img.shields.io/docker/pulls/smqasims/imagesync.svg" alt="pulls"/></a>
-</p>
-
 # imagesync
 
 A tool to copy/sync container images in registries without a demon.
