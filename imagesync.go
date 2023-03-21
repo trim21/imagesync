@@ -16,6 +16,7 @@ import (
 	ocilayout "github.com/containers/image/v5/oci/layout"
 	"github.com/containers/image/v5/signature"
 	"github.com/containers/image/v5/types"
+	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -177,7 +178,8 @@ func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, sr
 		if err != nil {
 			return fmt.Errorf("%q is not valid regexp", pattern)
 		}
-		srcTags = include(srcTags, re)
+
+		srcTags = lo.Filter(srcTags, func(item string, index int) bool { return re.MatchString(item) })
 	}
 
 	// exclude tags
@@ -186,7 +188,7 @@ func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, sr
 		if err != nil {
 			return fmt.Errorf("%q is not valid regexp", pattern)
 		}
-		srcTags = exclude(srcTags, re)
+		srcTags = lo.Filter(srcTags, func(item string, index int) bool { return !re.MatchString(item) })
 	}
 
 	var tags []string
@@ -267,39 +269,10 @@ func hasTag(ref string, imageRef types.ImageReference) bool {
 func subtract(ts1 []string, ts2 []string) []string {
 	var diff []string
 	for _, term := range ts1 {
-		if contains(ts2, term) {
+		if lo.Contains(ts2, term) {
 			continue
 		}
 		diff = append(diff, term)
 	}
 	return diff
-}
-
-func contains(items []string, item string) bool {
-	for _, it := range items {
-		if it == item {
-			return true
-		}
-	}
-	return false
-}
-
-func include(items []string, pattern *regexp.Regexp) []string {
-	selected := make([]string, 0, len(items))
-	for _, tag := range items {
-		if pattern.MatchString(tag) {
-			selected = append(selected, tag)
-		}
-	}
-	return selected
-}
-
-func exclude(items []string, pattern *regexp.Regexp) []string {
-	selected := make([]string, 0, len(items))
-	for _, tag := range items {
-		if !pattern.MatchString(tag) {
-			selected = append(selected, tag)
-		}
-	}
-	return selected
 }
