@@ -6,7 +6,7 @@ require (
 	github.com/containers/image/v5 v5.26.1
 	github.com/samber/lo v1.38.1
 	github.com/sirupsen/logrus v1.9.3
-	github.com/urfave/cli/v2 v2.25.5
+	github.com/urfave/cli/v2 v2.25.7
 )
 
 require (
