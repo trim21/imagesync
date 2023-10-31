@@ -20,7 +20,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - run: apt update
-      - run: apt install libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config -y
+      - run: sudo apt update
+      - run: sudo apt install libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config -y
 
       - run: go build ./cmd/imagesync/
