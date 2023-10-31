@@ -20,9 +20,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - uses: awalsh128/cache-apt-pkgs-action@v1
-        with:
-          packages: libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config
-          version: '1'
+      - run: apt update
+      - run: apt install libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config -y
 
       - run: go build ./cmd/imagesync/
