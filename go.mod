@@ -3,7 +3,7 @@ module github.com/trim21/imagesync
 go 1.20
 
 require (
-	github.com/containers/image/v5 v5.29.0
+	github.com/containers/image/v5 v5.29.2
 	github.com/samber/lo v1.39.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.1
