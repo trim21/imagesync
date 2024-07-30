@@ -15,9 +15,6 @@ builds:
       - linux
     goarch:
       - amd64
-    ignore:
-      - goos: darwin
-        goarch: 386
 
 archives:
   - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
@@ -30,28 +27,31 @@ changelog:
   use: github
   filters:
     exclude:
-      - '^test:'
-      - '^chore'
-      - 'merge conflict'
+      - "^tests:"
+      - "^tests\\("
+      - "merge conflict"
       - Merge pull request
       - Merge remote-tracking branch
       - Merge branch
       - go mod tidy
   groups:
     - title: Dependency updates
-      regexp: '^.*?(feat|fix)\(deps\)!?:.+$'
+      regexp: '^.*?(.+)\(deps\)!?:.+$'
       order: 300
-    - title: 'New Features'
-      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+    - title: "New Features"
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
       order: 100
-    - title: 'Bug fixes'
-      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+    - title: "Security updates"
+      regexp: '^.*?sec(\(.+\))??!?:.+$'
+      order: 150
+    - title: "Bug fixes"
+      regexp: '^.*?(fix|refactor)(\(.+\))??!?:.+$'
       order: 200
-    - title: 'Documentation updates'
-      regexp: ^.*?doc(\([[:word:]]+\))??!?:.+$
+    - title: "Documentation updates"
+      regexp: ^.*?docs?(\(.+\))??!?:.+$
       order: 400
-    - title: 'Build process updates'
-      regexp: ^.*?build(\([[:word:]]+\))??!?:.+$
+    - title: "Build process updates"
+      regexp: ^.*?(build|ci)(\(.+\))??!?:.+$
       order: 400
     - title: Other work
       order: 9999
