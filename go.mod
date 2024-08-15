@@ -1,8 +1,8 @@
 module github.com/trim21/imagesync
 
-go 1.22
+go 1.23
 
-toolchain go1.22.5
+toolchain go1.23.0
 
 require (
 	github.com/containers/image/v5 v5.32.0
