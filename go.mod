@@ -8,7 +8,7 @@ require (
 	github.com/containers/image/v5 v5.32.0
 	github.com/samber/lo v1.46.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/urfave/cli/v2 v2.27.3
+	github.com/urfave/cli/v2 v2.27.4
 )
 
 require (
