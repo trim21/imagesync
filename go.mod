@@ -6,7 +6,7 @@ toolchain go1.23.3
 
 require (
 	github.com/containers/image/v5 v5.33.0
-	github.com/samber/lo v1.47.0
+	github.com/samber/lo v1.49.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.5
 )
