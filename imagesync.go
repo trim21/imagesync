@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
-	"sync"
 
 	"github.com/containers/image/v5/copy"
 	"github.com/containers/image/v5/docker"
@@ -19,6 +19,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/sync/errgroup"
 )
 
 var Version string
@@ -166,6 +167,8 @@ func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, sr
 		return fmt.Errorf("getting source tags: %w", err)
 	}
 
+	slices.Sort(srcTags)
+
 	// skip tags
 	shouldSkip := cliCtx.String("skip-tags")
 	if shouldSkip != "" {
@@ -215,37 +218,39 @@ func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, sr
 
 	// sync repository by copying each tag. Errors are ignored on purpose
 	// and only warning are shown via ReportWriter for failing tags.
-	var wg sync.WaitGroup
+	wg, ctx := errgroup.WithContext(ctx)
 	ch := make(chan string, len(tags))
-	wg.Add(numberOfConcurrentTags)
 	for i := 0; i < numberOfConcurrentTags; i++ {
-		go func() {
+		wg.Go(func() error {
 			for {
 				tag, ok := <-ch
 				if !ok {
-					wg.Done()
-					return
+					return nil
 				}
 				destTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", cliCtx.String("dest"), tag))
 				if err != nil {
-					logrus.Warnf("failed parsing dest ref: %s", err)
+					return err
 				}
 				srcTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", cliCtx.String("src"), tag))
 				if err != nil {
-					logrus.Warnf("failed parsing src ref: %s", err)
+					return err
 				}
 				if err = copyImage(ctx, destTagRef, srcTagRef, &opts); err != nil {
-					logrus.Warnf("failed copying image: %s", err)
+					return err
 				}
 			}
-		}()
+		})
 	}
-	for _, tag := range tags {
-		ch <- tag
-	}
-	close(ch)
-	wg.Wait()
-	return nil
+
+	wg.Go(func() error {
+		for _, tag := range tags {
+			ch <- tag
+		}
+		close(ch)
+		return nil
+	})
+
+	return wg.Wait()
 }
 
 func copyImage(ctx context.Context, destRef, srcRef types.ImageReference, opts *copy.Options) error {
