@@ -18,10 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'go.mod'
+      - uses: trim21/actions/setup-go@master
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
