@@ -1,0 +1,35 @@
+name: Security Vulnerability Check
+
+on:
+  push:
+    branches-ignore:
+      - renovate/**
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - ".golangci.yaml"
+      - ".github/workflows/security.yaml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - ".github/workflows/security.yaml"
+  schedule:
+    - cron: "45 8 * * 5"
+
+env:
+  GOTOOLCHAIN: "local"
+
+jobs:
+  vulnerability-scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: trim21/actions/setup-go@master
+
+      - run: go run golang.org/x/vuln/cmd/govulncheck ./...
