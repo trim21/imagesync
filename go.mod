@@ -5,7 +5,7 @@ go 1.24.1
 tool golang.org/x/vuln/cmd/govulncheck
 
 require (
-	github.com/containers/image/v5 v5.34.1
+	github.com/containers/image/v5 v5.34.2
 	github.com/samber/lo v1.49.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.27.6
@@ -19,7 +19,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
 	github.com/containers/ocicrypt v1.2.1 // indirect
-	github.com/containers/storage v1.57.1 // indirect
+	github.com/containers/storage v1.57.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20231217050601-ba74d44ecf5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
