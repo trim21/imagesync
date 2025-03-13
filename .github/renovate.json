@@ -3,6 +3,6 @@
   "extends": [
     "local>trim21/renovate-config",
     "local>trim21/renovate-config:monthly",
-    "local>trim21/renovate-config:go"
+    "local>trim21/renovate-config//go/app"
   ]
 }
