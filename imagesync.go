@@ -152,10 +152,9 @@ func DetectAndCopyImage(c CliInput) error {
 				return fmt.Errorf("copy repository: %w", err)
 			}
 		}
-
-		logrus.Info("Image(s) sync completed.")
 	}
 
+	logrus.Info("Image(s) sync completed.")
 	return nil
 }
 
