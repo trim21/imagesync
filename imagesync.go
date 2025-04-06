@@ -147,8 +147,10 @@ func DetectAndCopyImage(c CliInput) error {
 			}
 		} else {
 			if hasTag(c.Destination, destRef) {
-				if err = copyRepository(ctx, c, srcRef, destRef, opts); err != nil {
-				}
+				return fmt.Errorf("tag shouldn't be provided in dest: %w", ErrInvalidTag)
+			}
+
+			if err = copyRepository(ctx, c, srcRef, destRef, opts); err != nil {
 				return fmt.Errorf("copy repository: %w", err)
 			}
 		}
