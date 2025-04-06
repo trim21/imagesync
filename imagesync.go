@@ -98,15 +98,15 @@ func DetectAndCopyImage(c CliInput) error {
 	}
 
 	// setup copy options
-	copyOpts := copy.Options{
+	opts := copy.Options{
 		ReportWriter:       os.Stdout,
 		ImageListSelection: copy.CopyAllImages,
 	}
 	if !c.DestinationStrictTLS {
-		copyOpts.DestinationCtx = &types.SystemContext{DockerInsecureSkipTLSVerify: types.NewOptionalBool(true)}
+		opts.DestinationCtx = &types.SystemContext{DockerInsecureSkipTLSVerify: types.NewOptionalBool(true)}
 	}
 	if !c.SourceStrictTLS {
-		copyOpts.SourceCtx = &types.SystemContext{DockerInsecureSkipTLSVerify: types.NewOptionalBool(true)}
+		opts.SourceCtx = &types.SystemContext{DockerInsecureSkipTLSVerify: types.NewOptionalBool(true)}
 	}
 
 	ctx := context.Background()
@@ -117,7 +117,7 @@ func DetectAndCopyImage(c CliInput) error {
 			if err != nil {
 				return fmt.Errorf("parsing source oci ref: %w", err)
 			}
-			if err = copyImage(ctx, destRef, srcRef, &copyOpts); err != nil {
+			if err = copyImage(ctx, destRef, srcRef, &opts); err != nil {
 				return fmt.Errorf("copy oci layout: %w", err)
 			}
 			logrus.Info("Image(s) sync completed.")
@@ -126,12 +126,12 @@ func DetectAndCopyImage(c CliInput) error {
 
 		// try copying oci archive with docker archive as fallback
 		srcRef, _ := ociarchive.ParseReference(c.Source)
-		if err = copyImage(ctx, destRef, srcRef, &copyOpts); err != nil {
+		if err = copyImage(ctx, destRef, srcRef, &opts); err != nil {
 			srcRef, err = dockerarchive.ParseReference(c.Source)
 			if err != nil {
 				return fmt.Errorf("parsing source docker-archive ref: %w", err)
 			}
-			if err = copyImage(ctx, destRef, srcRef, &copyOpts); err != nil {
+			if err = copyImage(ctx, destRef, srcRef, &opts); err != nil {
 				return fmt.Errorf("copy docker-archive layout: %w", err)
 			}
 		}
@@ -142,12 +142,12 @@ func DetectAndCopyImage(c CliInput) error {
 			return fmt.Errorf("parsing source docker ref: %w", err)
 		}
 		if hasTag(c.Source, srcRef) {
-			if err = copyImage(ctx, destRef, srcRef, &copyOpts); err != nil {
+			if err = copyImage(ctx, destRef, srcRef, &opts); err != nil {
 				return fmt.Errorf("copy tag: %w", err)
 			}
 		} else {
 			if hasTag(c.Destination, destRef) {
-				if err = copyRepository(ctx, c, srcRef, destRef, copyOpts); err != nil {
+				if err = copyRepository(ctx, c, srcRef, destRef, opts); err != nil {
 				}
 				return fmt.Errorf("copy repository: %w", err)
 			}
