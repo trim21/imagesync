@@ -33,3 +33,10 @@ jobs:
       - run: sudo apt install libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config -y
 
       - run: go run golang.org/x/vuln/cmd/govulncheck ./...
+
+      - name: Notify failed build
+        uses: jayqi/failed-build-issue-action@v1
+        if: failure()
+        with:
+          github-token: ${{ github.token }}
+          label-name: vulncheck
