@@ -11,26 +11,19 @@ imagesync -h
 ## Usage
 
 ```
-NAME:
-   imagesync - Sync container images in registries.
-
-USAGE:
-   imagesync [global options] command [command options] [arguments...]
-
-COMMANDS:
-   help, h  Shows a list of commands or help for one command
-
-GLOBAL OPTIONS:
-   --src value, -s value        Reference for the source container image/repository.
-   --src-strict-tls             Enable strict TLS for connections to source container registry.
-   --dest value, -d value       Reference for the destination container repository.
-   --dest-strict-tls            Enable strict TLS for connections to destination container registry.
-   --tags-pattern value         Regex pattern to select for tag to-be synced.
-   --skip-tags-pattern value    Regex pattern to exclude tags.
-   --skip-tags value            Comma separated list of tags to be skipped.
-   --overwrite                  Use this to copy/override all the tags.
-   --max-concurrent-tags value  Maximum number of tags to be synced/copied in parallel. (default: 1)
-   --help, -h                   show help
+Usage:
+  Sync container images in registries. [flags]
+Flags:
+  -d, --dest string                Reference for the destination container repository.
+      --dest-strict-tls            Enable strict TLS for connections to destination container registry.
+  -h, --help                       help for Sync
+      --max-concurrent-tags int    Maximum number of tags to be synced/copied in parallel. (default 1)
+      --overwrite                  Use this to copy/override all the tags.
+      --skip-tags string           Comma separated list of tags to be skipped.
+      --skip-tags-pattern string   Regex pattern to exclude tags.
+  -s, --src string                 Reference for the source container image/repository.
+      --src-strict-tls             Enable strict TLS for connections to source container registry.
+      --tags-pattern string        Regex pattern to select tags for syncing.
 ```
 
 ## Examples
