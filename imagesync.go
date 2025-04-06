@@ -154,8 +154,9 @@ func DetectAndCopyImage(opts SyncOptions) error {
 		}
 
 		logrus.Info("Image(s) sync completed.")
-		return nil
 	}
+
+	return nil
 }
 
 func copyRepository(
