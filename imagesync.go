@@ -18,7 +18,7 @@ import (
 	"github.com/containers/image/v5/types"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -26,58 +26,58 @@ var Version string
 
 var ErrInvalidTag = errors.New("invalid tag")
 
-func Execute() error {
-	app := cli.NewApp()
-	app.Name = "imagesync"
-	app.Usage = "Sync container images in registries."
-	app.Version = Version
+// Define variables for flag values
+// Define options struct
+type CliInput struct {
+	Source          string
+	SourceStrictTLS bool
 
-	app.Flags = []cli.Flag{
-		&cli.StringFlag{
-			Name:    "src",
-			Usage:   "Reference for the source container image/repository.",
-			Aliases: []string{"s"},
-		},
-		&cli.BoolFlag{
-			Name:  "src-strict-tls",
-			Usage: "Enable strict TLS for connections to source container registry.",
-		},
-		&cli.StringFlag{
-			Name:     "dest",
-			Usage:    "Reference for the destination container repository.",
-			Aliases:  []string{"d"},
-			Required: true,
-		},
-		&cli.BoolFlag{
-			Name:  "dest-strict-tls",
-			Usage: "Enable strict TLS for connections to destination container registry.",
-		},
-		&cli.StringFlag{
-			Name:  "tags-pattern",
-			Usage: "Regex pattern to select tags for syncing.",
-		},
-		&cli.StringFlag{
-			Name:  "skip-tags-pattern",
-			Usage: "Regex pattern to exclude tags.",
-		},
-		&cli.StringFlag{
-			Name:  "skip-tags",
-			Usage: "Comma separated list of tags to be skipped.",
-		},
-		&cli.BoolFlag{
-			Name:  "overwrite",
-			Usage: "Use this to copy/override all the tags.",
-		},
-		&cli.IntFlag{
-			Name:  "max-concurrent-tags",
-			Usage: "Maximum number of tags to be synced/copied in parallel.",
-			Value: 1,
-		},
+	Destination          string
+	DestinationStrictTLS bool
+
+	TagsPattern     string
+	SkipTagsPattern string
+
+	SkipTags string
+
+	Overwrite bool
+
+	MaxConcurrentTags int
+}
+
+func Execute() error {
+	cmd := cobra.Command{
+		Use:     "Sync container images in registries.",
+		Version: Version,
 	}
 
-	app.Action = cli.ActionFunc(DetectAndCopyImage)
+	// Create instance with defaults
+	opts := CliInput{
+		MaxConcurrentTags: 1,
+	}
 
-	if err := app.Run(os.Args); err != nil {
+	// Add flags to the command
+	flags := cmd.Flags()
+	flags.StringVarP(&opts.Source, "src", "s", "", "Reference for the source container image/repository.")
+	flags.BoolVar(&opts.SourceStrictTLS, "src-strict-tls", false, "Enable strict TLS for connections to source container registry.")
+
+	flags.StringVarP(&opts.Destination, "dest", "d", "", "Reference for the destination container repository.")
+
+	flags.BoolVar(&opts.DestinationStrictTLS, "dest-strict-tls", false, "Enable strict TLS for connections to destination container registry.")
+	flags.StringVar(&opts.TagsPattern, "tags-pattern", "", "Regex pattern to select tags for syncing.")
+	flags.StringVar(&opts.SkipTagsPattern, "skip-tags-pattern", "", "Regex pattern to exclude tags.")
+	flags.StringVar(&opts.SkipTags, "skip-tags", "", "Comma separated list of tags to be skipped.")
+	flags.BoolVar(&opts.Overwrite, "overwrite", false, "Use this to copy/override all the tags.")
+	flags.IntVar(&opts.MaxConcurrentTags, "max-concurrent-tags", 1, "Maximum number of tags to be synced/copied in parallel.")
+
+	lo.Must0(cmd.MarkFlagRequired("src"))
+	lo.Must0(cmd.MarkFlagRequired("dest"))
+
+	cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		return DetectAndCopyImage(opts)
+	}
+
+	if err := cmd.Execute(); err != nil {
 		return err
 	}
 	return nil
@@ -91,9 +91,8 @@ func Execute() error {
 //   - src is an image with a tag copy single image to dest.
 //   - none of the above then it is an entire repository sync
 //     to sync the repositories.
-func DetectAndCopyImage(c *cli.Context) error {
-	dest := c.String("dest")
-	destRef, err := docker.ParseReference(fmt.Sprintf("//%s", dest))
+func DetectAndCopyImage(c CliInput) error {
+	destRef, err := docker.ParseReference(fmt.Sprintf("//%s", c.Destination))
 	if err != nil {
 		return fmt.Errorf("parsing destination ref: %w", err)
 	}
@@ -103,19 +102,18 @@ func DetectAndCopyImage(c *cli.Context) error {
 		ReportWriter:       os.Stdout,
 		ImageListSelection: copy.CopyAllImages,
 	}
-	if !c.Bool("dest-strict-tls") {
+	if !c.DestinationStrictTLS {
 		opts.DestinationCtx = &types.SystemContext{DockerInsecureSkipTLSVerify: types.NewOptionalBool(true)}
 	}
-	if !c.Bool("src-strict-tls") {
+	if !c.SourceStrictTLS {
 		opts.SourceCtx = &types.SystemContext{DockerInsecureSkipTLSVerify: types.NewOptionalBool(true)}
 	}
 
 	ctx := context.Background()
-	src := c.String("src")
-	if info, err := os.Stat(src); err == nil {
+	if info, err := os.Stat(c.Source); err == nil {
 		// copy oci layout
 		if info.IsDir() {
-			srcRef, err := ocilayout.ParseReference(src)
+			srcRef, err := ocilayout.ParseReference(c.Source)
 			if err != nil {
 				return fmt.Errorf("parsing source oci ref: %w", err)
 			}
@@ -127,9 +125,9 @@ func DetectAndCopyImage(c *cli.Context) error {
 		}
 
 		// try copying oci archive with docker archive as fallback
-		srcRef, _ := ociarchive.ParseReference(src)
+		srcRef, _ := ociarchive.ParseReference(c.Source)
 		if err = copyImage(ctx, destRef, srcRef, &opts); err != nil {
-			srcRef, err = dockerarchive.ParseReference(src)
+			srcRef, err = dockerarchive.ParseReference(c.Source)
 			if err != nil {
 				return fmt.Errorf("parsing source docker-archive ref: %w", err)
 			}
@@ -139,19 +137,20 @@ func DetectAndCopyImage(c *cli.Context) error {
 		}
 	} else {
 		// copy single tag sync entire repository
-		srcRef, err := docker.ParseReference(fmt.Sprintf("//%s", src))
+		srcRef, err := docker.ParseReference(fmt.Sprintf("//%s", c.Source))
 		if err != nil {
 			return fmt.Errorf("parsing source docker ref: %w", err)
 		}
-		if hasTag(src, srcRef) {
+		if hasTag(c.Source, srcRef) {
 			if err = copyImage(ctx, destRef, srcRef, &opts); err != nil {
 				return fmt.Errorf("copy tag: %w", err)
 			}
 		} else {
-			if hasTag(dest, destRef) {
+			if hasTag(c.Destination, destRef) {
 				return fmt.Errorf("tag shouldn't be provided in dest: %w", ErrInvalidTag)
 			}
-			if err = copyRepository(ctx, c, destRef, srcRef, opts); err != nil {
+
+			if err = copyRepository(ctx, c, srcRef, destRef, opts); err != nil {
 				return fmt.Errorf("copy repository: %w", err)
 			}
 		}
@@ -161,7 +160,13 @@ func DetectAndCopyImage(c *cli.Context) error {
 	return nil
 }
 
-func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, srcRepository types.ImageReference, opts copy.Options) error {
+func copyRepository(
+	ctx context.Context,
+	c CliInput,
+	destRepository,
+	srcRepository types.ImageReference,
+	opts copy.Options,
+) error {
 	srcTags, err := docker.GetRepositoryTags(ctx, opts.SourceCtx, srcRepository)
 	if err != nil {
 		return fmt.Errorf("getting source tags: %w", err)
@@ -170,13 +175,12 @@ func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, sr
 	slices.Sort(srcTags)
 
 	// skip tags
-	shouldSkip := cliCtx.String("skip-tags")
-	if shouldSkip != "" {
-		srcTags = subtract(srcTags, strings.Split(shouldSkip, ","))
+	if c.SkipTags != "" {
+		srcTags = subtract(srcTags, strings.Split(c.SkipTags, ","))
 	}
 
 	// match tags
-	if pattern := cliCtx.String("tags-pattern"); pattern != "" {
+	if pattern := c.TagsPattern; pattern != "" {
 		re, err := regexp.Compile(pattern)
 		if err != nil {
 			return fmt.Errorf("%q is not valid regexp", pattern)
@@ -186,7 +190,7 @@ func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, sr
 	}
 
 	// exclude tags
-	if pattern := cliCtx.String("skip-tags-pattern"); pattern != "" {
+	if pattern := c.SkipTagsPattern; pattern != "" {
 		re, err := regexp.Compile(pattern)
 		if err != nil {
 			return fmt.Errorf("%q is not valid regexp", pattern)
@@ -196,7 +200,7 @@ func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, sr
 
 	var tags []string
 	destTags, err := docker.GetRepositoryTags(ctx, opts.DestinationCtx, destRepository)
-	if cliCtx.Bool("overwrite") || err != nil {
+	if c.Overwrite || err != nil {
 		tags = srcTags
 	} else {
 		tags = subtract(srcTags, destTags)
@@ -210,9 +214,8 @@ func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, sr
 	logrus.Infof("Starting image sync with total-tags=%d tags=%v source=%s destination=%s", len(tags), tags, srcRepository.DockerReference().Name(), destRepository.DockerReference().Name())
 
 	// limit the go routines to avoid 429 on registries
-	maxConcurrentTags := cliCtx.Int("max-concurrent-tags")
-	numberOfConcurrentTags := maxConcurrentTags
-	if len(tags) < maxConcurrentTags {
+	numberOfConcurrentTags := c.MaxConcurrentTags
+	if len(tags) < c.MaxConcurrentTags {
 		numberOfConcurrentTags = len(tags)
 	}
 
@@ -227,11 +230,11 @@ func copyRepository(ctx context.Context, cliCtx *cli.Context, destRepository, sr
 				if !ok {
 					return nil
 				}
-				destTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", cliCtx.String("dest"), tag))
+				destTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", c.Destination, tag))
 				if err != nil {
 					return err
 				}
-				srcTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", cliCtx.String("src"), tag))
+				srcTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", c.Source, tag))
 				if err != nil {
 					return err
 				}

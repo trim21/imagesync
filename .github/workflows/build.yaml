@@ -20,4 +20,5 @@ jobs:
       - run: sudo apt update
       - run: sudo apt install libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config -y
 
-      - run: go build ./cmd/imagesync/
+      - run: go build -o dist/imagesync ./cmd/imagesync/
+      - run: dist/imagesync --help
