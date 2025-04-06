@@ -28,7 +28,7 @@ var ErrInvalidTag = errors.New("invalid tag")
 
 // Define variables for flag values
 // Define options struct
-type SyncOptions struct {
+type CliInput struct {
 	Source          string
 	SourceStrictTLS bool
 
@@ -52,7 +52,7 @@ func Execute() error {
 	}
 
 	// Create instance with defaults
-	opts := SyncOptions{
+	opts := CliInput{
 		MaxConcurrentTags: 1,
 	}
 
@@ -91,8 +91,8 @@ func Execute() error {
 //   - src is an image with a tag copy single image to dest.
 //   - none of the above then it is an entire repository sync
 //     to sync the repositories.
-func DetectAndCopyImage(opts SyncOptions) error {
-	destRef, err := docker.ParseReference(fmt.Sprintf("//%s", opts.Destination))
+func DetectAndCopyImage(c CliInput) error {
+	destRef, err := docker.ParseReference(fmt.Sprintf("//%s", c.Destination))
 	if err != nil {
 		return fmt.Errorf("parsing destination ref: %w", err)
 	}
@@ -102,18 +102,18 @@ func DetectAndCopyImage(opts SyncOptions) error {
 		ReportWriter:       os.Stdout,
 		ImageListSelection: copy.CopyAllImages,
 	}
-	if !opts.DestinationStrictTLS {
+	if !c.DestinationStrictTLS {
 		copyOpts.DestinationCtx = &types.SystemContext{DockerInsecureSkipTLSVerify: types.NewOptionalBool(true)}
 	}
-	if !opts.SourceStrictTLS {
+	if !c.SourceStrictTLS {
 		copyOpts.SourceCtx = &types.SystemContext{DockerInsecureSkipTLSVerify: types.NewOptionalBool(true)}
 	}
 
 	ctx := context.Background()
-	if info, err := os.Stat(opts.Source); err == nil {
+	if info, err := os.Stat(c.Source); err == nil {
 		// copy oci layout
 		if info.IsDir() {
-			srcRef, err := ocilayout.ParseReference(opts.Source)
+			srcRef, err := ocilayout.ParseReference(c.Source)
 			if err != nil {
 				return fmt.Errorf("parsing source oci ref: %w", err)
 			}
@@ -125,9 +125,9 @@ func DetectAndCopyImage(opts SyncOptions) error {
 		}
 
 		// try copying oci archive with docker archive as fallback
-		srcRef, _ := ociarchive.ParseReference(opts.Source)
+		srcRef, _ := ociarchive.ParseReference(c.Source)
 		if err = copyImage(ctx, destRef, srcRef, &copyOpts); err != nil {
-			srcRef, err = dockerarchive.ParseReference(opts.Source)
+			srcRef, err = dockerarchive.ParseReference(c.Source)
 			if err != nil {
 				return fmt.Errorf("parsing source docker-archive ref: %w", err)
 			}
@@ -137,17 +137,17 @@ func DetectAndCopyImage(opts SyncOptions) error {
 		}
 	} else {
 		// copy single tag sync entire repository
-		srcRef, err := docker.ParseReference(fmt.Sprintf("//%s", opts.Source))
+		srcRef, err := docker.ParseReference(fmt.Sprintf("//%s", c.Source))
 		if err != nil {
 			return fmt.Errorf("parsing source docker ref: %w", err)
 		}
-		if hasTag(opts.Source, srcRef) {
+		if hasTag(c.Source, srcRef) {
 			if err = copyImage(ctx, destRef, srcRef, &copyOpts); err != nil {
 				return fmt.Errorf("copy tag: %w", err)
 			}
 		} else {
-			if hasTag(opts.Destination, destRef) {
-				if err = copyRepository(ctx, opts, srcRef, destRef, copyOpts); err != nil {
+			if hasTag(c.Destination, destRef) {
+				if err = copyRepository(ctx, c, srcRef, destRef, copyOpts); err != nil {
 				}
 				return fmt.Errorf("copy repository: %w", err)
 			}
@@ -161,12 +161,12 @@ func DetectAndCopyImage(opts SyncOptions) error {
 
 func copyRepository(
 	ctx context.Context,
-	opts SyncOptions,
+	c CliInput,
 	destRepository,
 	srcRepository types.ImageReference,
-	copyOpts copy.Options,
+	opts copy.Options,
 ) error {
-	srcTags, err := docker.GetRepositoryTags(ctx, copyOpts.SourceCtx, srcRepository)
+	srcTags, err := docker.GetRepositoryTags(ctx, opts.SourceCtx, srcRepository)
 	if err != nil {
 		return fmt.Errorf("getting source tags: %w", err)
 	}
@@ -174,12 +174,12 @@ func copyRepository(
 	slices.Sort(srcTags)
 
 	// skip tags
-	if opts.SkipTags != "" {
-		srcTags = subtract(srcTags, strings.Split(opts.SkipTags, ","))
+	if c.SkipTags != "" {
+		srcTags = subtract(srcTags, strings.Split(c.SkipTags, ","))
 	}
 
 	// match tags
-	if pattern := opts.TagsPattern; pattern != "" {
+	if pattern := c.TagsPattern; pattern != "" {
 		re, err := regexp.Compile(pattern)
 		if err != nil {
 			return fmt.Errorf("%q is not valid regexp", pattern)
@@ -189,7 +189,7 @@ func copyRepository(
 	}
 
 	// exclude tags
-	if pattern := opts.SkipTagsPattern; pattern != "" {
+	if pattern := c.SkipTagsPattern; pattern != "" {
 		re, err := regexp.Compile(pattern)
 		if err != nil {
 			return fmt.Errorf("%q is not valid regexp", pattern)
@@ -198,8 +198,8 @@ func copyRepository(
 	}
 
 	var tags []string
-	destTags, err := docker.GetRepositoryTags(ctx, copyOpts.DestinationCtx, destRepository)
-	if opts.Overwrite || err != nil {
+	destTags, err := docker.GetRepositoryTags(ctx, opts.DestinationCtx, destRepository)
+	if c.Overwrite || err != nil {
 		tags = srcTags
 	} else {
 		tags = subtract(srcTags, destTags)
@@ -213,8 +213,8 @@ func copyRepository(
 	logrus.Infof("Starting image sync with total-tags=%d tags=%v source=%s destination=%s", len(tags), tags, srcRepository.DockerReference().Name(), destRepository.DockerReference().Name())
 
 	// limit the go routines to avoid 429 on registries
-	numberOfConcurrentTags := opts.MaxConcurrentTags
-	if len(tags) < opts.MaxConcurrentTags {
+	numberOfConcurrentTags := c.MaxConcurrentTags
+	if len(tags) < c.MaxConcurrentTags {
 		numberOfConcurrentTags = len(tags)
 	}
 
@@ -229,15 +229,15 @@ func copyRepository(
 				if !ok {
 					return nil
 				}
-				destTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", opts.Destination, tag))
+				destTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", c.Destination, tag))
 				if err != nil {
 					return err
 				}
-				srcTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", opts.Source, tag))
+				srcTagRef, err := docker.ParseReference(fmt.Sprintf("//%s:%s", c.Source, tag))
 				if err != nil {
 					return err
 				}
-				if err = copyImage(ctx, destTagRef, srcTagRef, &copyOpts); err != nil {
+				if err = copyImage(ctx, destTagRef, srcTagRef, &opts); err != nil {
 					return err
 				}
 			}
