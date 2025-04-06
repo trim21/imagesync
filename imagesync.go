@@ -18,7 +18,7 @@ import (
 	"github.com/containers/image/v5/types"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 )
 
