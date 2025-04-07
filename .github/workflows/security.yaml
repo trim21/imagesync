@@ -25,7 +25,7 @@ jobs:
   vulnerability-scan:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - uses: trim21/actions/setup-go@master
 
@@ -35,7 +35,7 @@ jobs:
       - run: go run golang.org/x/vuln/cmd/govulncheck ./...
 
       - name: Notify failed build
-        uses: jayqi/failed-build-issue-action@v1
+        uses: jayqi/failed-build-issue-action@1a893bbf43ef1c2a8705e2b115cd4f0fe3c5649b # v1
         if: failure()
         with:
           github-token: ${{ github.token }}
