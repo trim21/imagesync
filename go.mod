@@ -76,14 +76,14 @@ require (
 	github.com/vbatts/tar-split v0.11.7 // indirect
 	github.com/vbauerster/mpb/v8 v8.9.1 // indirect
 	go.mongodb.org/mongo-driver v1.14.0 // indirect
-	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.36.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/telemetry v0.0.0-20240522233618-39ace7a40ae7 // indirect
-	golang.org/x/term v0.29.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/term v0.30.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.29.0 // indirect
 	golang.org/x/vuln v1.1.4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250102185135-69823020774d // indirect
