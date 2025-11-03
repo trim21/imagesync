@@ -1,6 +1,6 @@
 module github.com/trim21/imagesync
 
-go 1.24.7
+go 1.24.9
 
 tool golang.org/x/vuln/cmd/govulncheck
 
