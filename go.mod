@@ -1,6 +1,6 @@
 module github.com/trim21/imagesync
 
-go 1.24.11
+go 1.25.0
 
 tool golang.org/x/vuln/cmd/govulncheck
 
@@ -8,7 +8,7 @@ require (
 	github.com/containers/image/v5 v5.36.2
 	github.com/samber/lo v1.52.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	golang.org/x/sync v0.18.0
 )
 
@@ -26,16 +26,15 @@ require (
 	github.com/docker/docker-credential-helpers v0.9.3 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/go-containerregistry v0.20.3 // indirect
+	github.com/google/go-containerregistry v0.20.6 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/letsencrypt/boulder v0.0.0-20240620165639-de9c06129bec // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mattn/go-sqlite3 v1.14.28 // indirect
 	github.com/miekg/pkcs11 v1.1.1 // indirect
@@ -49,15 +48,14 @@ require (
 	github.com/opencontainers/runtime-spec v1.2.1 // indirect
 	github.com/proglottis/gpgme v0.1.4 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/secure-systems-lab/go-securesystemslib v0.9.0 // indirect
-	github.com/sigstore/fulcio v1.6.6 // indirect
-	github.com/sigstore/protobuf-specs v0.4.1 // indirect
-	github.com/sigstore/sigstore v1.9.5 // indirect
+	github.com/rogpeppe/go-internal v1.14.1 // indirect
+	github.com/secure-systems-lab/go-securesystemslib v0.9.1 // indirect
+	github.com/sigstore/fulcio v1.8.3 // indirect
+	github.com/sigstore/protobuf-specs v0.5.0 // indirect
+	github.com/sigstore/sigstore v1.10.0 // indirect
 	github.com/smallstep/pkcs7 v0.1.1 // indirect
-	github.com/spf13/pflag v1.0.9 // indirect
+	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/stefanberger/go-pkcs11uri v0.0.0-20230803200340-78284954bff6 // indirect
-	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/ulikunitz/xz v0.5.15 // indirect
 	github.com/vbatts/tar-split v0.12.1 // indirect
 	github.com/vbauerster/mpb/v8 v8.10.2 // indirect
@@ -71,10 +69,10 @@ require (
 	golang.org/x/tools v0.38.0 // indirect
 	golang.org/x/tools/go/packages/packagestest v0.1.1-deprecated // indirect
 	golang.org/x/vuln v1.1.4 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
-	google.golang.org/grpc v1.72.2 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20251022142026-3a174f9686a8 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251103181224-f26f9409b101 // indirect
+	google.golang.org/grpc v1.77.0 // indirect
+	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
