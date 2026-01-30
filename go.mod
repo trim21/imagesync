@@ -7,7 +7,7 @@ tool golang.org/x/vuln/cmd/govulncheck
 require (
 	github.com/containers/image/v5 v5.36.2
 	github.com/samber/lo v1.52.0
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/sync v0.19.0
 )
