@@ -4,11 +4,6 @@ on:
   pull_request:
     branches:
       - master
-    paths:
-      - "**.go"
-      - "go.mod"
-      - "go.sum"
-      - ".github/workflows/security.yaml"
   schedule:
     - cron: "45 8 * * 5"
 
