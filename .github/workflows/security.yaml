@@ -19,7 +19,7 @@ jobs:
       issues: write
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
 
       - uses: trim21/actions/setup-go@master
 
