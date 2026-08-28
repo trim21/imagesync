@@ -26,14 +26,45 @@ jobs:
       - run: sudo apt update
       - run: sudo apt install libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config -y
 
-      - run: go run golang.org/x/vuln/cmd/govulncheck ./...
+      - run: go run golang.org/x/vuln/cmd/govulncheck ./... 2>&1 | tee /tmp/govulncheck.log
 
       - name: Notify failed build
-        uses: jayqi/failed-build-issue-action@v1.2.0
         if: failure()
+        uses: actions/github-script@v9.0.0
         with:
           github-token: ${{ github.token }}
-          label-name: vulncheck
+          script: |
+            const fs = require('fs');
+            const label = 'vulncheck';
+            const { owner, repo } = context.repo;
+
+            let log = '';
+            try {
+              log = fs.readFileSync('/tmp/govulncheck.log', 'utf8').trim();
+            } catch (e) {
+              // govulncheck 之前的步骤失败时没有 log 文件
+            }
+            if (log.length > 50000) {
+              log = log.slice(0, 50000) + '\n... (truncated)';
+            }
+
+            const ref = context.ref.replace('refs/heads/', '');
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+            let body = `GitHub Actions workflow [${context.workflow} #${context.runNumber}](${runUrl}) failed.\n\nEvent: ${context.eventName}\nBranch: [${ref}](https://github.com/${owner}/${repo}/tree/${ref})\nCommit: [${context.sha}](https://github.com/${owner}/${repo}/commit/${context.sha})`;
+            if (log) {
+              body += `\n\n<details><summary>govulncheck output</summary>\n\n\`\`\`\n${log}\n\`\`\`\n\n</details>`;
+            }
+
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner, repo, labels: label, state: 'open', per_page: 100 }
+            );
+            const existing = issues.sort((a, b) => b.number - a.number)[0];
+            if (existing) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({ owner, repo, title: 'Failed build: Security Vulnerability Check', body, labels: [label] });
+            }
 
       - name: Close resolved vulnerability issues
         if: success()
